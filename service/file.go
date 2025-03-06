@@ -1,6 +1,7 @@
 package service
 
 import (
+	"excelToGo/common"
 	"github.com/fatih/color"
 	"github.com/fsnotify/fsnotify"
 	"os"
@@ -10,7 +11,6 @@ import (
 )
 
 var (
-	dir      = "E:/cqsy/envir/trunk/excels/"
 	FileList map[string]string
 
 	quit    chan bool
@@ -35,7 +35,7 @@ func InitFileList() {
 	if nil == err {
 		watcher = tw
 
-		dir, err := filepath.Abs(dir)
+		dir, err := filepath.Abs(common.ExcelDir)
 		if nil != err {
 			color.Red("添加监控目录失败:", err, dir)
 		} else {
@@ -78,7 +78,7 @@ outLoop:
 		default:
 			count++
 			//color.Green("runWatcher:%d", count)
-			time.Sleep(time.Duration(5) * time.Second)
+			time.Sleep(time.Duration(2) * time.Second)
 		}
 	}
 
@@ -87,7 +87,7 @@ outLoop:
 }
 
 func loadFiles() {
-	err := filepath.WalkDir(dir, func(path string, info os.DirEntry, err error) error {
+	err := filepath.WalkDir(common.ExcelDir, func(path string, info os.DirEntry, err error) error {
 		if nil != err {
 			return err
 		}

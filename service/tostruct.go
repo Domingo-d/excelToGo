@@ -1,8 +1,12 @@
 package service
 
 import (
+	"bufio"
+	"excelToGo/common"
+	"fmt"
 	"github.com/fatih/color"
 	"github.com/xuri/excelize/v2"
+	"os"
 	"strings"
 )
 
@@ -100,16 +104,41 @@ func ExcelToGo(path string) error {
 		}
 	}
 
-	color.Green("type (\n")
+	saveFile(sheetInfo)
+
+	return nil
+}
+
+func saveFile(sheetInfo map[string]*ExcelToGoStruct) {
+	path := common.OutputPath
+	_, err := os.Stat(path)
+	if err == nil {
+		os.Remove(path)
+	}
+
+	file, err := os.Create(path)
+	if err != nil {
+		color.Red("create file error:%s", err.Error())
+	}
+
+	defer file.Close()
+
+	writer := bufio.NewWriter(file)
+
+	writer.WriteString("type (\n")
 	for _, data := range sheetInfo {
 		if len(data.element) <= 0 {
 			continue
 		}
 
-		color.Green("\t%s struct {\n", strings.ToUpper(data.name[:1])+data.name[1:])
+		writer.WriteString(fmt.Sprintf("\t%s struct {\n", strings.ToUpper(data.name[:1])+data.name[1:]))
 		for _, element := range data.element {
 			tp := element.tp
 			name := element.name
+			if name == "ref" || name == "" {
+				continue
+			}
+
 			tag := element.name
 			if "" != element.link {
 				tag = element.link
@@ -131,14 +160,12 @@ func ExcelToGo(path string) error {
 				tp = prefix + tp
 			}
 
-			if "" != name {
-				color.Green("\t\t%s %s `json:\"%s\"`\n", strings.ToUpper(name[:1])+name[1:],
-					tp, tag)
-			}
+			writer.WriteString(fmt.Sprintf("\t\t%s %s `json:\"%s\"` \n", strings.ToUpper(name[:1])+name[1:],
+				tp, tag))
 		}
-		color.Green("\t}\n")
+		writer.WriteString("\t}\n")
 	}
-	color.Green(")\n")
+	writer.WriteString(")\n")
 
-	return nil
+	writer.Flush()
 }
