@@ -16,7 +16,7 @@ import (
 
 var (
 	InteractiveCmd = &cobra.Command{
-		Use:               "console",
+		Use:               "Console",
 		Short:             "交互式控制台",
 		PersistentPreRunE: func(*cobra.Command, []string) error { return nil },
 		Run: func(cmd *cobra.Command, args []string) {
