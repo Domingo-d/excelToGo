@@ -75,6 +75,8 @@ func ExcelToGo(path string) error {
 						colNode.tp = "uint32"
 					case "float":
 						colNode.tp = "float32"
+					case "float[]":
+						colNode.tp = "[]float32"
 					case "int[]":
 						colNode.tp = "[]uint32"
 					case "str[]":
@@ -135,9 +137,11 @@ func saveFile(sheetInfo map[string]*ExcelToGoStruct) {
 		for _, element := range data.element {
 			tp := element.tp
 			name := element.name
-			if name == "ref" || name == "" {
+			if name == "ref" || name == "" || name == data.name {
 				continue
 			}
+
+			name = strings.ToUpper(name[:1]) + name[1:]
 
 			tag := element.name
 			if "" != element.link {
@@ -146,7 +150,6 @@ func saveFile(sheetInfo map[string]*ExcelToGoStruct) {
 
 			if obj, ok := sheetInfo[tag]; ok {
 				tp = strings.ToUpper(tag[:1]) + tag[1:]
-
 				var prefix string
 				for _, str := range strings.Split(obj.tp, ",") {
 					switch str {
@@ -160,7 +163,7 @@ func saveFile(sheetInfo map[string]*ExcelToGoStruct) {
 				tp = prefix + tp
 			}
 
-			writer.WriteString(fmt.Sprintf("\t\t%s %s `json:\"%s\"` \n", strings.ToUpper(name[:1])+name[1:],
+			writer.WriteString(fmt.Sprintf("\t\t%s %s `json:\"%s\"` \n", name,
 				tp, tag))
 		}
 		writer.WriteString("\t}\n")

@@ -3,7 +3,6 @@ package cmd
 import (
 	"bufio"
 	"excelToGo/service"
-	"fmt"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"io"
@@ -102,7 +101,7 @@ func showMenu() {
 	0. 重新显示菜单
 	============== End ==============`
 
-	fmt.Println(menu)
+	color.Yellow(menu)
 }
 
 func handleInput(input string) {
