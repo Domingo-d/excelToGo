@@ -130,8 +130,21 @@ func searchFile() {
 }
 
 func generateJson() {
+	closeWriteList := make([]io.WriteCloser, 0)
+	closeReadList := make([]io.ReadCloser, 0)
+
+	defer func() {
+		for _, v := range closeWriteList {
+			v.Close()
+		}
+
+		for _, v := range closeReadList {
+			v.Close()
+		}
+	}()
+
 	for {
-		green.Print("> exit退出 输入:")
+		green.Print("> exit退出 输入文件名:")
 		inText, err := scanner.ReadString('\n')
 		if err != nil {
 			color.Red("generateJson scanner.ReadString Error:%s", err.Error())
@@ -154,8 +167,9 @@ func generateJson() {
 		if err != nil || err1 != nil {
 			color.Red("获取stdinPipe失败:%v", err)
 		}
-		defer stdin.Close()
-		defer stdout.Close()
+
+		closeWriteList = append(closeWriteList, stdin)
+		closeReadList = append(closeReadList, stdout)
 
 		if err := cmd.Start(); err != nil {
 			color.Red("generateJson cmd.Start Error:%s", err.Error())
